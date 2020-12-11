@@ -4,14 +4,12 @@ const Discord = require("discord.js");
 const fetch = require("node-fetch");
 
 const client = new Discord.Client();
-// client.login(config.BOT_TOKEN);
 client.login(process.env.BOT_TOKEN);
 
 const prefix = "!";
 // Alpha Vantage API key
-const API_KEY = "D4H07VYYHEWMYMQV";
+const API_KEY = process.env.BOT_TOKEN.API_TOKEN;
 const apiEndpoint = "https://www.alphavantage.co/query?apikey=" + API_KEY;
-// const CHANNEL_ID = "780999678564499466";
 
 client.on("message", async function(message) {
     if (message.author.bot) return;
@@ -40,7 +38,6 @@ client.on("message", async function(message) {
                 url.searchParams.set("symbol", ticker)
                 fetch(url.toString()).then(async (res) => {
                     const json = await res.json();
-                    console.log(json);
                     if (json.Description) {
                         const quoteUrl = new URL(apiEndpoint);
                         quoteUrl.searchParams.set("function", "GLOBAL_QUOTE")
