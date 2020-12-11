@@ -4,12 +4,10 @@ const Discord = require("discord.js");
 const fetch = require("node-fetch");
 
 const client = new Discord.Client();
-// client.login(process.env.BOT_TOKEN);
-client.login("Nzg2NzYzNjg4ODkwNTk3NDA2.X9LIyA.x8-8EjGP3yZt7O9QOUry3nIqymI");
+client.login(process.env.BOT_TOKEN);
 const prefix = "!";
 // Alpha Vantage API key
-const API_KEY = "D4H07VYYHEWMYMQV";
-//  process.env.BOT_TOKEN.API_TOKEN;
+const API_KEY =process.env.BOT_TOKEN.API_TOKEN;
 
 const apiEndpoint = "https://www.alphavantage.co/query?apikey=" + API_KEY;
 
