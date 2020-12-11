@@ -11,6 +11,9 @@ const prefix = "!";
 const API_KEY = process.env.BOT_TOKEN.API_TOKEN;
 const apiEndpoint = "https://www.alphavantage.co/query?apikey=" + API_KEY;
 
+// Current stock watchlist
+const watchlist = ['GIK', 'GIX', 'AQB', 'APXT', 'THCB', 'AMD', 'BFT', 'TPGY'];
+
 client.on("message", async function(message) {
     if (message.author.bot) return;
     if (!message.content.startsWith(prefix)) return;
@@ -59,6 +62,15 @@ client.on("message", async function(message) {
         }
 
     }
+
+    if (command === "w" || command === "watch" || command === "watchlist") {
+        const embed = new Discord.MessageEmbed()     
+            .setColor('#0099ff')
+            .setTitle("Watch List");
+        for (let ticker of watchlist) {
+            embed.addField({name: "Ticker", value: "$$$"})
+        }
+    }
 });
 
 /*
@@ -78,6 +90,7 @@ function getTickerMessage(ticker, description, exchange, marketCap, employees, i
         .setColor('#0099ff')
         // Set the title of the field
         .setTitle(exchange + ': ' + ticker)
+        .setURL('https://google.com/search?q=' + ticker + " ticker");
         .addFields(
             { name: 'Market Cap', value: convertMarketCapToString(marketCap), inline: true },
             { name: 'Employees', value: employees, inline: true },
