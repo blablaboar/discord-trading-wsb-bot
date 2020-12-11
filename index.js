@@ -90,7 +90,7 @@ function getTickerMessage(ticker, description, exchange, marketCap, employees, i
         .setColor('#0099ff')
         // Set the title of the field
         .setTitle(exchange + ': ' + ticker)
-        .setURL('https://google.com/search?q=' + ticker + " ticker");
+        .setURL('https://google.com/search?q=' + ticker + " ticker")
         .addFields(
             { name: 'Market Cap', value: convertMarketCapToString(marketCap), inline: true },
             { name: 'Employees', value: employees, inline: true },
