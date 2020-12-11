@@ -1,0 +1,16 @@
+{
+  "name": "discord-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "\"Ling\"",
+  "license": "ISC",
+  "dependencies": {
+    "alphavantage": "^2.2.0",
+    "discord.js": "^12.5.1",
+    "node-fetch": "^2.6.1"
+  }
+}
