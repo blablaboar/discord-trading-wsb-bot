@@ -4,15 +4,17 @@ const Discord = require("discord.js");
 const fetch = require("node-fetch");
 
 const client = new Discord.Client();
-client.login(process.env.BOT_TOKEN);
-
+// client.login(process.env.BOT_TOKEN);
+client.login("Nzg2NzYzNjg4ODkwNTk3NDA2.X9LIyA.x8-8EjGP3yZt7O9QOUry3nIqymI");
 const prefix = "!";
 // Alpha Vantage API key
-const API_KEY = process.env.BOT_TOKEN.API_TOKEN;
+const API_KEY = "D4H07VYYHEWMYMQV";
+//  process.env.BOT_TOKEN.API_TOKEN;
+
 const apiEndpoint = "https://www.alphavantage.co/query?apikey=" + API_KEY;
 
 // Current stock watchlist
-const watchlist = ['GIK', 'GIX', 'AQB', 'APXT', 'THCB', 'AMD', 'BFT', 'TPGY'];
+const watchlist = ['GIK', 'GIX', 'GHIV', 'AQB', 'APXT', 'THCB', 'AMD', 'BFT', 'TPGY'];
 
 client.on("message", async function(message) {
     if (message.author.bot) return;
@@ -43,8 +45,8 @@ client.on("message", async function(message) {
                     const json = await res.json();
                     if (json.Description) {
                         const quoteUrl = new URL(apiEndpoint);
-                        quoteUrl.searchParams.set("function", "GLOBAL_QUOTE")
-                        quoteUrl.searchParams.set("symbol", ticker)
+                        quoteUrl.searchParams.set("function", "GLOBAL_QUOTE");
+                        quoteUrl.searchParams.set("symbol", ticker);
                         fetch(quoteUrl.toString()).then(async (newres) => {
                             const newjson = await newres.json();
                             const embed = getTickerMessage(ticker.toUpperCase(), json.Description, json.Exchange, json.MarketCapitalization, json.FullTimeEmployees, json.Industry, newjson);
@@ -68,8 +70,10 @@ client.on("message", async function(message) {
             .setColor('#0099ff')
             .setTitle("Watch List");
         for (let ticker of watchlist) {
-            embed.addField({name: "Ticker", value: "$$$"})
+            const price = await getStockPrice(ticker)
+            embed.addField(ticker, price);
         }
+        message.channel.send(embed);
     }
 });
 
@@ -85,12 +89,15 @@ function getTickerMessage(ticker, description, exchange, marketCap, employees, i
     if (footer.length >= 1024) {
         footer = footer.substring(0, 1021) + "...";
     } 
+    const googleUrl = new URL("https://google.com/search");
+    googleUrl.searchParams.set("q", ticker +"ticker");
+
     return new Discord.MessageEmbed()
         // Set the color of the embed
         .setColor('#0099ff')
         // Set the title of the field
         .setTitle(exchange + ': ' + ticker)
-        .setURL('https://google.com/search?q=' + ticker + " ticker")
+        .setURL(googleUrl.toString())
         .addFields(
             { name: 'Market Cap', value: convertMarketCapToString(marketCap), inline: true },
             { name: 'Employees', value: employees, inline: true },
@@ -113,4 +120,22 @@ function convertMarketCapToString(marketCap) {
     } else {
         return (cap/1000000000).toFixed(3) + "B";
     }
+}
+
+
+/*
+ * Returns the current stock price of a ticker. 
+ */
+function getStockPrice(ticker) {
+    const quoteUrl = new URL(apiEndpoint);
+    quoteUrl.searchParams.set("function", "GLOBAL_QUOTE");
+    quoteUrl.searchParams.set("symbol", ticker);
+    return fetch(quoteUrl.toString()).then(async (newres) => {
+        const newjson = await newres.json();
+        if (!newjson["Global Quote"]) {
+            return "$$$";
+        }
+        const globalQuote = newjson["Global Quote"];
+        return globalQuote["05. price"];
+    });
 }
