@@ -1,10 +1,11 @@
 // Discord bot which is supposed to check for SPACs?
 const Discord = require("discord.js");
-const config = require("./config.json");
+// const config = require("./config.json");
 const fetch = require("node-fetch");
 
 const client = new Discord.Client();
-client.login(config.BOT_TOKEN);
+// client.login(config.BOT_TOKEN);
+client.login(process.env.BOT_TOKEN);
 
 const prefix = "!";
 // Alpha Vantage API key
