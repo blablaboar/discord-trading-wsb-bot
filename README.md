@@ -28,10 +28,10 @@ I want to keep expanding this bot in the future, as it's honestly pretty cool an
 * Create something like a robo-advisor
 * Graphs with interesting data about stocks
 * Technical analysis about tickers, i.e. important ratios like MACD, RSI, etc.
-* Fundamental analysis about a tickers
-* Reddit scraper from r/wallstreetbets to get information from there like posts
+* Fundamental analysis about tickers
+* Reddit scraper from r/wallstreetbets for popular tickers
 * Create the ability to paper trade (set up a DB for this)
-* Make this a less hacky project
+* Make this a less hacky project:
   * Tests
   * More organisation/modularisation
   * Use Babel for ES6/TypeScript support
