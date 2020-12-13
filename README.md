@@ -28,7 +28,7 @@ I want to keep expanding this bot in the future, as it's honestly pretty cool an
 * Create something like a robo-advisor
 * Graphs with interesting data about stocks
 * Technical analysis about tickers, i.e. important ratios like MACD, RSI, etc.
-* Fundamental analysis about ticker
+* Fundamental analysis about a tickers
 * Reddit scraper from r/wallstreetbets to get information from there like posts
 * Create the ability to paper trade (set up a DB for this)
 
