@@ -1,19 +1,29 @@
 // Discord bot which is supposed to check for SPACs?
 const Discord = require("discord.js");
+const Json2csvParser = require('json2csv').Parser
 const fetch = require("node-fetch");
 const csv = require('csv-parser');
 const fs = require('fs');
+const watchList = require("./watchList.js").watchList;
+const pLimit = require('p-limit');
+
+// Env config for API keys during local development.
 require('dotenv').config();
 
+// Create client and login with bot api key for discord.
 const client = new Discord.Client();
 client.login(process.env.BOT_TOKEN);
-const prefix = "!";
+
 // Alpha Vantage API key
 const API_KEY = process.env.API_TOKEN;
 const apiEndpoint = "https://www.alphavantage.co/query?apikey=" + API_KEY;
 
-// Current stock watchlist
-const watchlist = ['GIK', 'GIX', 'GHIV', 'AQB', 'APXT', 'THCB', 'AMD', 'BFT', 'TPGY'];
+// Only allow one promise to run concurrently to limit requests to the API.
+// TODO: investigate whether this is necessary, or using something like p-queue might be more useful.
+// Can we run more than one promise concurrently?
+const limit = pLimit(1);
+const prefix = "!";
+
 client.on("message", async function(message) {
     if (message.author.bot) return;
     if (!message.content.startsWith(prefix)) return;
@@ -31,6 +41,7 @@ client.on("message", async function(message) {
         message.reply("Welcome r/wsb autist!");
     }
     
+    // TODO: support multiple args, i.e. !t amd aapl
     if (command === "t" || command === "ticker") {
         if (args.length !== 1) {
             message.reply("You must have exactly 1 argument after ticker, i.e. !ticker AMD");
@@ -67,7 +78,7 @@ client.on("message", async function(message) {
         const embed = new Discord.MessageEmbed()     
             .setColor('#0099ff')
             .setTitle("Watch List");
-        for (let ticker of watchlist) {
+        for (let ticker of watchList) {
             const price = await getStockPrice(ticker)
             embed.addField(ticker, price);
         }
@@ -83,7 +94,7 @@ client.on("message", async function(message) {
             if (!details) {
                 message.channel.send("Failed to fetch ticker data! This command is for SPAC tickers only.")
             } else {
-                const volume = await getStockVolume(ticker);
+                const volume = await getStockVolume(ticker, 0);
                 const embed = new Discord.MessageEmbed()     
                     .setColor('#0099ff')
                     .setTitle(ticker.toUpperCase()+ ': ' + details["Name"]);
@@ -92,6 +103,32 @@ client.on("message", async function(message) {
                 message.channel.send(embed);
             }
         }
+    }
+
+    if (command.toLowerCase() === "spacs") {
+        message.channel.send("This may take some time to get the data!");
+        // Limit the number of concurrent promises running.
+        const spacsList = await getListOfSPACs();
+        const spacsPromises = spacsList.map((spac)=> {
+            return limit(() => {
+                console.log(spac);
+                return getStockVolume(spac, 3000);
+            });
+        });
+
+        const spacVolumes = await Promise.all(spacsPromises);
+        const spacsWithVolume = spacVolumes.map(async (spacVolume, index) => {
+            const spac = spacsList[index];
+            const details = await getSPACDetails(spac);
+            return {"Ticker": spac, "Daily Volume": numberWithCommas(spacVolume), "Average Daily Volume": details["Average trading volume"]};
+        });
+        const json2csvParser = new Json2csvParser();
+        const csv = json2csvParser.parse(spacsWithVolume);
+        // TODO: figure out some way to update this, instead of needing to run locally.
+        // Perhaps configure S3 or use google sheets API/something similar? 
+        fs.writeFileSync(`./spacsVolume.csv`, csv, {flag: 'w'}, function(err){
+            if (err) consoleLog('Error saving CSV file:' + err.message, "ERR")
+        });
     }
 });
 
@@ -160,12 +197,17 @@ function getStockPrice(ticker) {
 /*
  * Returns the daily volume for a stock ticker.
  */
-function getStockVolume(ticker) {
+function getStockVolume(ticker, delay) {
+    const wait = ms => new Promise(
+        (resolve, reject) => setTimeout(resolve, ms)
+      );
     const quoteUrl = new URL(apiEndpoint);
     quoteUrl.searchParams.set("function", "GLOBAL_QUOTE");
     quoteUrl.searchParams.set("symbol", ticker);
     return fetch(quoteUrl.toString()).then(async (newres) => {
         const newjson = await newres.json();
+        // Potentially limit the rate at which this request goes off. 
+        await wait(delay);
         if (!newjson["Global Quote"]) {
             return "$$$";
         }
@@ -175,7 +217,7 @@ function getStockVolume(ticker) {
 }
 
 /*
- * Returns an object containing details about an SPAC from the CSV file
+ * Returns an promise containing details about an SPAC from the CSV file
  */
 function getSPACDetails(ticker) {
     let spac = 0;
@@ -194,8 +236,41 @@ function getSPACDetails(ticker) {
 }
 
 /*
+ * Returns a list of SPAC tickers from spacs.csv.
+ */
+function getListOfSPACs() {
+    const spacsList = [];
+    // TODO: don't hardcode this later, fetch instead of reading from csv.
+    return new Promise((resolve, reject) => {
+        fs.createReadStream('spacs.csv')
+        .pipe(csv())
+        .on('data', (row) => {
+            spacsList.push(row.Symbol.toUpperCase());
+        }).on('end', function () {
+            resolve(spacsList);
+        })
+    });
+}
+
+/*
  * Formats a string with comma separators for the thousands places. 
  */
 function numberWithCommas(number) {
+    if (!number) {
+        return "0";
+    }
     return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+/*
+ * Parses a nested array to CSV format. 
+ */
+function parseNestedListToCSV(rows) {
+    let csvContent = "data:text/csv;charset=utf-8,";
+
+    const res = rows.map((rowArray) => {
+        let row = rowArray.join(",");
+        csvContent += row + "\r\n";
+    });
+    return res;
 }
