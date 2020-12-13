@@ -31,6 +31,12 @@ I want to keep expanding this bot in the future, as it's honestly pretty cool an
 * Fundamental analysis about a tickers
 * Reddit scraper from r/wallstreetbets to get information from there like posts
 * Create the ability to paper trade (set up a DB for this)
+* Make this a less hacky project
+  * Tests
+  * More organisation/modularisation
+  * Use Babel for ES6/TypeScript support
+  * Scalability (server/API support)
+  * Separate environments, i.e. local/staging/prod
 
 # Local Development
 You need to install [NodeJS](https://nodejs.org/en/download/) before running this application. After that: 
