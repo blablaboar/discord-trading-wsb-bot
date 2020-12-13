@@ -1,5 +1,5 @@
 # Stock Discord Bot
-This project is a little pet project of mine since i've spending a lot more time pouring over the stock market. This bot does a bunch of cool things that help get information to make better trades. It's written using NodeJS, the DiscordJS API for writing discord bots in NodeJS, and hosted on Heroku. The stock ticker data comes from Alphavantage. In the future I want to expand the functionality, and potentially write a bot for implementing trading strategies (i.e. the theta gang wheel strategy).
+This project is a little pet project of mine since i've spending a lot more time pouring over the stock market. This bot does a bunch of cool things that help get information to make better trades, and is currently in development for usage in my private discord. However, this could definitely be more modular and be more public in the future. Not sure if I have plans to scale it more though. It's written using NodeJS, the DiscordJS API for writing discord bots in NodeJS, and hosted on Heroku. The stock ticker data comes from Alphavantage. In the future I want to expand the functionality, and potentially write a bot for implementing trading strategies (i.e. the theta gang wheel strategy).
 
 # Current Functionality
 ## Commands
